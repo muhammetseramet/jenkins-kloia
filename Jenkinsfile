@@ -1,28 +1,31 @@
 pipeline {
-    agent { label 'master' }
-    stages {
-        stage('build') {
-            steps {
-                echo "Hello World!"
-                echo "Hello Kloia Bootcamp"
-            }
-        }
-        stage('Deploy') {
-            steps {
-            echo "Deploy Stage"
-            }
-        }
-        stage('run-parallel-branches') {
-              steps {
-                parallel(
-                  a: {
-                    echo "This is branch a"
-                  },
-                  b: {
-                    echo "This is branch b"
-                  }
-                )
-              }
-         }
+  environment {
+    registry = "muhammetseramet/docker-test"
+    registryCredential = 'dockerhub'
+    dockerImage = ''
+  }
+  agent any
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git 'https://github.com/muhammetseramet/jenkins-kloia.git'
+      }
     }
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+      }
+    }
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+  }
 }
