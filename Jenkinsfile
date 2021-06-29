@@ -7,5 +7,10 @@ pipeline {
                 echo "Hello Kloia Bootcamp"
             }
         }
+        stage('Deploy') {
+            steps {
+            echo "Deploy Stage"
+            }
+        }
     }
 }
